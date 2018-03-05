@@ -10,7 +10,7 @@ def eval_clf(model1, model2, x, y, n, cuda):
         out = model1(model2(Variable(torch.from_numpy(x[:n])).cuda()).view(n, -1))
     else:
         out = model1(model2(Variable(torch.from_numpy(x[:n]))).view(n, -1))
-    preds = out.max(1)[1]
+    preds = out.max(1)[1].cpu()
     return accuracy_score(y_true=[np.argmax(i) for i in y[:n]], y_pred=preds.data.numpy().ravel())
 
 
