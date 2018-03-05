@@ -147,11 +147,11 @@ for i in range(num_src_epochs):
         print('\rEpoch {}       - loss: {}'.format(i + 1, format(f_c_loss.cpu().data[0], '.4f')), end='')
 
     # print epoch statistics    
-    s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000)
+    s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000, cuda)
     print(' - val_acc: {}'.format(format(s_acc, '.4f')))
 
 # print target accuracy with source model
-t_acc = eval_clf(c_clf, f_ext, Xt_test, yt_test, 1000)
+t_acc = eval_clf(c_clf, f_ext, Xt_test, yt_test, 1000, cuda)
 print('\nTarget accuracy with source model: {}\n'.format(format(t_acc, '.4f')))
 
 # train DANN model
@@ -224,8 +224,8 @@ for i in range(num_epochs):
         k += 1
 
         # print epoch statistics
-    t_acc = eval_clf(c_clf, f_ext, Xt_test, yt_test, 1000)
-    s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000)
+    t_acc = eval_clf(c_clf, f_ext, Xt_test, yt_test, 1000, cuda)
+    s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000, cuda)
     logger.scalar_summary("acc/source", s_acc, k)
     logger.scalar_summary("acc/target", t_acc, k)
     print('\nTarget_acc: {} - source_acc: {}'.format(format(t_acc, '.4f'), format(s_acc, '.4f')))
