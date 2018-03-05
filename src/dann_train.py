@@ -191,6 +191,7 @@ for i in range(num_epochs):
 
         if cuda:
             x = x.cuda()
+            xs = xs.cuda()
             ys = ys.cuda()
         # calculate class_classifier predictions on batch xs
         c_out = c_clf(f_ext(xs).view(int(batch_size / 2), -1))
