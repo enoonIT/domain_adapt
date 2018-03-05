@@ -199,4 +199,4 @@ for i in range(num_epochs):
         # print epoch statistics
     t_acc = eval_clf(c_clf, f_ext, Xt_test, yt_test, 1000)
     s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000)
-    print(' - target_acc: {} - source_acc: {}'.format(format(t_acc, '.4f'), format(s_acc, '.4f')))
+    print('\nTarget_acc: {} - source_acc: {}'.format(format(t_acc, '.4f'), format(s_acc, '.4f')))
