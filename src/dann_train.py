@@ -29,7 +29,7 @@ from torch.autograd import Variable, Function
 
 from evaluation import eval_clf
 from logger import Logger
-from models import DANN
+from models import DANN, DANN_deco
 from data_handling import batch_generator, data_loader
 
 
@@ -71,7 +71,10 @@ if target_data is "mnist_m":
     input_ch = 3
 
 # instantiate the models
-f_ext, d_clf, c_clf = DANN(input_ch)
+if args.use_deco:
+    f_ext, d_clf, c_clf = DANN_deco(input_ch)
+else:
+    f_ext, d_clf, c_clf = DANN(input_ch)
 
 # set loss functions
 d_crit = nn.BCELoss()  # binary crossentropy
