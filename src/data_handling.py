@@ -4,7 +4,7 @@ from torch.autograd import Variable
 import numpy as np
 from sklearn.model_selection import KFold
 
-from data_sources import load_mnistm, load_mnist, load_usps
+from .data_sources import load_mnistm, load_mnist, load_usps
 
 # generates torch tensor batches from input data
 def batch_generator(batch_size, data, labels):
