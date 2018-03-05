@@ -58,7 +58,7 @@ def get_name(args):
 
 args = get_args()
 run_name = get_name(args)
-logger = Logger("logs/" + run_name)
+logger = Logger("../logs/" + run_name)
 # parameters
 learning_rate = args.lr  # learning rate
 num_epochs = args.epochs  # number of epochs to train models
