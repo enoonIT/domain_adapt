@@ -24,9 +24,9 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.autograd import Variable, Function
 
-from .evaluation import eval_clf
-from .models import DANN
-from .data_handling import batch_generator, data_loader
+from evaluation import eval_clf
+from models import DANN
+from data_handling import batch_generator, data_loader
    
 # parameters
 learning_rate = 1e-2          # learning rate
