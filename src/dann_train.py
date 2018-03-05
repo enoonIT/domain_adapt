@@ -38,11 +38,12 @@ def get_args():
     parser.add_argument('--lr', type=float, default=1e-2)
     # parser.add_argument('--image_size', type=int, default=28)
     parser.add_argument('--batch_size', default=50, type=int)
-    parser.add_argument('--num_src_epochs', default=15, type=int, help="number of epochs to pre-train source only model")
+    parser.add_argument('--num_src_epochs', default=15, type=int,
+                        help="number of epochs to pre-train source only model")
     parser.add_argument('--epochs', default=30, type=int)
     # parser.add_argument('--DANN_weight', default=1.0, type=float)
     parser.add_argument('--use_deco', action="store_true", help="If true use deco architecture")
-    parser.add_argument('--suffix', help="Will be added to end of name")
+    parser.add_argument('--suffix', help="Will be added to end of name", default="")
     parser.add_argument('--source', default="mnist")
     parser.add_argument('--target', default="usps")
     return parser.parse_args()
@@ -137,6 +138,7 @@ print('\nTarget accuracy with source model: {}\n'.format(format(t_acc, '.4f')))
 
 # train DANN model
 print('Training DANN model..')
+k = 0
 for i in range(num_epochs):
     source_gen = batch_generator(int(batch_size / 2), Xs_train, ys_train)
     target_gen = batch_generator(int(batch_size / 2), Xt_train, None)
@@ -195,8 +197,14 @@ for i in range(num_epochs):
         # print batch statistics
         print('\rEpoch         - d_loss: {} - c_loss: {}'.format(format(f_d_loss.data[0], '.4f'),
                                                                  format(f_c_loss.data[0], '.4f')), end='')
+        if (k % 30) is 0:
+            logger.scalar_summary("loss/source", f_c_loss.data[0], k)
+            logger.scalar_summary("loss/domain", f_d_loss.data[0], k)
+        k += 1
 
         # print epoch statistics
     t_acc = eval_clf(c_clf, f_ext, Xt_test, yt_test, 1000)
     s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000)
+    logger.scalar_summary("acc/source", s_acc, k)
+    logger.scalar_summary("acc/target", t_acc, k)
     print('\nTarget_acc: {} - source_acc: {}'.format(format(t_acc, '.4f'), format(s_acc, '.4f')))
