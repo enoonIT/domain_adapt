@@ -26,6 +26,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.autograd import Variable, Function
+from torch.backends import cudnn
 
 from evaluation import eval_clf
 from logger import Logger
@@ -56,6 +57,8 @@ def get_name(args):
     return name + args.suffix + "_%d" % (time.time() % 100)
 
 
+cuda = True
+cudnn.benchmark = True
 args = get_args()
 run_name = get_name(args)
 logger = Logger("../logs/" + run_name)
@@ -80,6 +83,13 @@ else:
 d_crit = nn.BCELoss()  # binary crossentropy
 c_crit = nn.MSELoss()  # mean squared error
 
+if cuda:
+    f_ext.cuda()
+    d_clf.cuda()
+    c_clf.cuda()
+    d_crit.cuda()
+    c_crit.cuda()
+
 # set optimizers
 d_optimizer = optim.SGD(d_clf.parameters(), lr=learning_rate, momentum=0.9)
 c_optimizer = optim.SGD(c_clf.parameters(), lr=learning_rate, momentum=0.9)
@@ -101,6 +111,8 @@ f_optimizer = optim.SGD(f_ext.parameters(), lr=learning_rate, momentum=0.9)
 num_steps = num_epochs * (Xs_train.shape[0] / batch_size)
 yd = Variable(
     torch.from_numpy(np.hstack([np.repeat(1, int(batch_size / 2)), np.repeat(0, int(batch_size / 2))]).reshape(50, 1)))
+if cuda:
+    yd = yd.cuda()
 j = 0
 
 # pre-train source only model
@@ -120,6 +132,9 @@ for i in range(num_src_epochs):
         c_clf.zero_grad()
 
         # calculate class_classifier predictions
+        if cuda:
+            xs = xs.cuda()
+            ys = ys.cuda()
         c_out = c_clf(f_ext(xs).view(int(batch_size / 2), -1))
 
         # optimize feature_extractor and class_classifier with output
@@ -129,7 +144,7 @@ for i in range(num_src_epochs):
         f_optimizer.step()
 
         # print batch statistics
-        print('\rEpoch {}       - loss: {}'.format(i + 1, format(f_c_loss.data[0], '.4f')), end='')
+        print('\rEpoch {}       - loss: {}'.format(i + 1, format(f_c_loss.cpu().data[0], '.4f')), end='')
 
     # print epoch statistics    
     s_acc = eval_clf(c_clf, f_ext, Xs_test, ys_test, 1000)
@@ -174,6 +189,9 @@ for i in range(num_epochs):
         f_ext.zero_grad()
         c_clf.zero_grad()
 
+        if cuda:
+            x = x.cuda()
+            ys = ys.cuda()
         # calculate class_classifier predictions on batch xs
         c_out = c_clf(f_ext(xs).view(int(batch_size / 2), -1))
 
@@ -198,11 +216,11 @@ for i in range(num_epochs):
         f_optimizer.step()
 
         # print batch statistics
-        print('\rEpoch         - d_loss: {} - c_loss: {}'.format(format(f_d_loss.data[0], '.4f'),
-                                                                 format(f_c_loss.data[0], '.4f')), end='')
+        print('\rEpoch         - d_loss: {} - c_loss: {}'.format(format(f_d_loss.cpu().data[0], '.4f'),
+                                                                 format(f_c_loss.cpu().data[0], '.4f')), end='')
         if (k % 30) is 0:
-            logger.scalar_summary("loss/source", f_c_loss.data[0], k)
-            logger.scalar_summary("loss/domain", f_d_loss.data[0], k)
+            logger.scalar_summary("loss/source", f_c_loss.cpu().data[0], k)
+            logger.scalar_summary("loss/domain", f_d_loss.cpu().data[0], k)
         k += 1
 
         # print epoch statistics
